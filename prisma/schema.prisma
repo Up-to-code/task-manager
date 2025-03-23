@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  points      Int          @default(5)
+  userId      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  dailyTasks  DailyTask[]
+
+  @@index([userId])
+}
+
+model DailyTask {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  completed Boolean  @default(false)
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([taskId, date, userId])
+  @@index([userId])
+  @@index([date])
+}
+
